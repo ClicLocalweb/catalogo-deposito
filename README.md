@@ -40,8 +40,19 @@ y entrá a `http://localhost:8000`.
 
 Para publicarla gratis con GitHub Pages: Settings, Pages, rama `main`, carpeta raíz.
 
+## Catálogo y pedido (versión de prueba)
+
+Debajo de la portada está el catálogo con productos de ejemplo de cada categoría (códigos y descripciones reales de la lista, sin precios) y el botón **Pedido** arriba a la derecha.
+
+- Las imágenes son dibujos de referencia. Se reemplazan por las fotos de los proveedores.
+- El cliente se reconoce por su link personal: `?c=CODIGO`. De prueba existe `?c=demo` (Lubricentro de prueba). Sin código, la página le pide el nombre del comercio.
+- El pedido queda guardado en el navegador del cliente hasta que lo envía.
+- **Todavía no se envía al depósito.** Al tocar Enviar muestra cómo llegaría. En la versión final va a la planilla del depósito (Apps Script).
+
 ## Pendiente
 
 - Foto real del auto (reemplaza al dibujo).
 - Fotos de los productos, con las imágenes de los proveedores.
-- Que cada categoría lleve al listado real de productos.
+- Cargar el catálogo completo desde la lista de precios.
+- Conectar el botón Enviar con la planilla del depósito.
+- Definir con el dueño: categorías finales, link por cliente, aviso al recibir pedido.

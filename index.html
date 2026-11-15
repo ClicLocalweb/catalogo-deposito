@@ -123,12 +123,124 @@
   }
   main h2{font-size:clamp(1.3rem,3vw,1.8rem);margin:0 0 8px;text-wrap:balance}
   main>p{color:var(--texto-2);margin:0 0 28px;max-width:62ch}
-  #grilla{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-  .cat{background:var(--carta);border:1px solid var(--borde);border-radius:14px;padding:18px;scroll-margin-top:90px;min-width:0}
-  .cat h3{margin:0 0 6px;font-size:1.05rem;display:flex;align-items:center;gap:10px}
-  .cat h3 svg{width:22px;height:22px;flex:none}
-  .cat p{margin:0;color:var(--texto-2);font-size:.9rem}
-  .cat .pronto{display:inline-block;margin-top:12px;font-size:.78rem;color:var(--acento-2);border:1px solid rgba(245,166,35,.4);border-radius:999px;padding:2px 10px}
+  /* atajos de categorías */
+  #atajos{display:flex;gap:8px;overflow-x:auto;padding:4px 0 14px;margin-bottom:10px;scrollbar-width:thin}
+  #atajos a{
+    flex:none;text-decoration:none;color:var(--texto);font-size:.85rem;
+    border:1px solid var(--borde);background:var(--carta);border-radius:999px;padding:6px 14px;
+  }
+  #atajos a:hover{border-color:var(--acento)}
+  #buscador{
+    width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--borde);
+    background:var(--carta);color:var(--texto);font-size:1rem;margin-bottom:24px;
+  }
+  #buscador::placeholder{color:var(--texto-2)}
+  .cat{scroll-margin-top:84px;margin-bottom:40px}
+  .cat>h3{margin:0 0 4px;font-size:1.25rem;display:flex;align-items:center;gap:10px}
+  .cat>h3 svg{width:26px;height:26px;flex:none}
+  .cat>p{margin:0 0 14px;color:var(--texto-2);font-size:.92rem}
+  .prods{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+  @media(max-width:460px){.prods{grid-template-columns:1fr 1fr;gap:10px}}
+  .prod{
+    background:var(--carta);border:1px solid var(--borde);border-radius:12px;overflow:hidden;
+    display:flex;flex-direction:column;min-width:0;
+  }
+  .prod .img{
+    position:relative;aspect-ratio:4/3;background:linear-gradient(160deg,#2a333d,#1a2027);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .prod .img svg{width:62%;height:auto;max-height:84%}
+  .prod .img small{
+    position:absolute;left:6px;bottom:5px;font-size:.62rem;color:#8c9aa6;letter-spacing:.04em;
+  }
+  .prod .info{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .prod .cod{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem;color:var(--acento-2)}
+  .prod .marca-p{font-size:.7rem;color:var(--texto-2);text-transform:uppercase;letter-spacing:.08em}
+  .prod .desc{font-size:.86rem;line-height:1.35;flex:1;overflow-wrap:anywhere}
+  .accion{display:flex;gap:6px;align-items:center;margin-top:4px}
+  .cant{display:flex;align-items:center;border:1px solid var(--borde);border-radius:8px;overflow:hidden}
+  .cant button{background:transparent;border:0;color:var(--texto);width:30px;height:34px;font-size:1.1rem;cursor:pointer}
+  .cant input{
+    width:38px;height:34px;text-align:center;border:0;background:transparent;color:var(--texto);font-size:.95rem;
+    -moz-appearance:textfield;
+  }
+  .cant input::-webkit-outer-spin-button,.cant input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .agregar{
+    flex:1;height:36px;border-radius:8px;border:0;cursor:pointer;
+    background:var(--acento);color:#1a1205;font-weight:700;font-size:.85rem;
+  }
+  .agregar:hover{filter:brightness(1.08)}
+  .en-pedido{font-size:.75rem;color:#7fd99a;min-height:1em}
+  @media(max-width:460px){
+    .accion{flex-direction:column;align-items:stretch}
+    .cant{justify-content:space-between}
+    .cant input{flex:1}
+  }
+  .sin-res{color:var(--texto-2);display:none}
+
+  /* ---------- botón del pedido ---------- */
+  #btn-pedido{
+    display:flex;align-items:center;gap:8px;cursor:pointer;
+    background:var(--acento);color:#1a1205;border:0;border-radius:999px;padding:8px 14px;font-weight:700;font-size:.9rem;
+  }
+  #btn-pedido svg{width:18px;height:18px}
+  #btn-pedido .n{background:#1a1205;color:var(--acento);border-radius:999px;min-width:22px;padding:0 6px;font-size:.8rem;text-align:center}
+  .der{display:flex;align-items:center;gap:16px}
+
+  /* ---------- panel del pedido ---------- */
+  #capa{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:80;opacity:0;pointer-events:none;transition:opacity .2s}
+  #capa.abierto{opacity:1;pointer-events:auto}
+  #panel{
+    position:fixed;top:0;right:0;bottom:0;z-index:90;width:min(440px,100%);
+    background:#151b21;border-left:1px solid var(--borde);
+    display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;
+    padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  #panel.abierto{transform:none}
+  #panel .cab{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--borde)}
+  #panel .cab h2{margin:0;font-size:1.15rem}
+  #cerrar{background:transparent;border:0;color:var(--texto);font-size:1.5rem;cursor:pointer;line-height:1}
+  #cliente{padding:12px 18px;border-bottom:1px solid var(--borde);font-size:.9rem;color:var(--texto-2)}
+  #cliente b{color:var(--texto)}
+  #cliente input{
+    width:100%;margin-top:6px;padding:10px 12px;border-radius:8px;border:1px solid var(--borde);
+    background:var(--carta);color:var(--texto);font-size:.95rem;
+  }
+  #lista{flex:1;overflow-y:auto;padding:8px 18px}
+  .item{display:grid;grid-template-columns:1fr auto;gap:6px 10px;padding:12px 0;border-bottom:1px solid var(--borde)}
+  .item .cod{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8rem;color:var(--acento-2)}
+  .item .desc{font-size:.85rem;grid-column:1/2;min-width:0;overflow-wrap:anywhere}
+  .item .cant{grid-row:1/3;grid-column:2;align-self:center}
+  .item .quitar{grid-column:1/3;justify-self:start;background:none;border:0;color:#e88;font-size:.78rem;cursor:pointer;padding:0}
+  .vacio{color:var(--texto-2);text-align:center;padding:40px 0}
+  #pie{padding:14px 18px 18px;border-top:1px solid var(--borde);display:flex;flex-direction:column;gap:10px}
+  #pie textarea{
+    width:100%;min-height:62px;resize:vertical;padding:10px 12px;border-radius:8px;border:1px solid var(--borde);
+    background:var(--carta);color:var(--texto);font:inherit;font-size:.9rem;
+  }
+  #resumen{font-size:.88rem;color:var(--texto-2)}
+  #enviar{
+    height:46px;border:0;border-radius:10px;background:var(--acento);color:#1a1205;font-weight:800;font-size:1rem;cursor:pointer;
+  }
+  #enviar:disabled{opacity:.4;cursor:not-allowed}
+  #aviso-demo{font-size:.75rem;color:var(--texto-2);text-align:center}
+  #listo{display:none;padding:28px 18px;text-align:center;flex:1;overflow-y:auto}
+  #listo .ok{font-size:2.4rem}
+  #listo h3{margin:6px 0 8px}
+  #listo p{color:var(--texto-2);font-size:.9rem;margin:0 0 14px}
+  #listo pre{
+    text-align:left;background:var(--carta);border:1px solid var(--borde);border-radius:8px;
+    padding:12px;font-size:.78rem;white-space:pre-wrap;overflow-wrap:anywhere;
+  }
+  #listo button{margin-top:12px;height:42px;padding:0 18px;border-radius:10px;border:1px solid var(--borde);background:transparent;color:var(--texto);cursor:pointer}
+
+  #toast{
+    position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:95;
+    transform:translate(-50%,30px);opacity:0;transition:all .25s;pointer-events:none;
+    background:#e9f7ee;color:#0f3b1d;border-radius:999px;padding:10px 18px;font-size:.9rem;font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,.4);white-space:nowrap;
+  }
+  #toast.ver{opacity:1;transform:translate(-50%,0)}
 
   footer{
     border-top:1px solid var(--borde);color:var(--texto-2);font-size:.85rem;text-align:center;
@@ -140,11 +252,17 @@
 
 <header>
   <div class="marca">Depósito de filtros<small>catálogo mayorista</small></div>
-  <nav>
-    <a href="#categorias">Categorías</a>
-    <a href="#cat-filtros">Filtros</a>
-    <a href="#cat-aceite">Aceites</a>
-  </nav>
+  <div class="der">
+    <nav>
+      <a href="#categorias">Categorías</a>
+      <a href="#cat-filtros">Filtros</a>
+      <a href="#cat-aceite">Aceites</a>
+    </nav>
+    <button id="btn-pedido" type="button" aria-label="Ver mi pedido">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 11.2a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.1L21 8H6.2"/><circle cx="9.5" cy="20" r="1.3"/><circle cx="17.5" cy="20" r="1.3"/></svg>
+      Pedido <span class="n" id="n-pedido">0</span>
+    </button>
+  </div>
 </header>
 
 <div id="pista">
@@ -165,10 +283,34 @@
 </div>
 
 <main id="categorias">
-  <h2>Elegí una categoría</h2>
-  <p>Trabajamos con las principales marcas del rubro. Pedinos por código, por equivalencia o por vehículo.</p>
+  <h2>Armá tu pedido</h2>
+  <p>Elegí los productos, poné la cantidad y agregalos al pedido. Cuando termines, tocá <b>Pedido</b> arriba a la derecha y envialo.</p>
+  <nav id="atajos" aria-label="Categorías"></nav>
+  <input id="buscador" type="search" placeholder="Buscar por código, vehículo o producto (ej.: Corsa, 5W30, MR152)">
+  <p class="sin-res" id="sin-res">No encontramos productos con esa búsqueda.</p>
   <div id="grilla"></div>
 </main>
+
+<div id="capa"></div>
+<aside id="panel" aria-label="Mi pedido" aria-hidden="true">
+  <div class="cab"><h2>Mi pedido</h2><button id="cerrar" type="button" aria-label="Cerrar">×</button></div>
+  <div id="cliente"></div>
+  <div id="lista"></div>
+  <div id="pie">
+    <textarea id="nota" placeholder="Nota para el depósito (opcional): horario de entrega, aclaraciones…"></textarea>
+    <div id="resumen"></div>
+    <button id="enviar" type="button">Enviar pedido</button>
+    <div id="aviso-demo">Versión de prueba: el pedido todavía no se envía al depósito.</div>
+  </div>
+  <div id="listo">
+    <div class="ok">✔</div>
+    <h3>Pedido armado</h3>
+    <p>En la versión final, este pedido llega directo a la planilla del depósito con tu nombre. En esta prueba no se envía: abajo ves cómo llegaría.</p>
+    <pre id="listo-txt"></pre>
+    <button id="nuevo" type="button">Armar otro pedido</button>
+  </div>
+</aside>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <footer>Catálogo en construcción · Los pedidos se reciben por los canales de siempre</footer>
 
@@ -244,11 +386,6 @@ const nodos = PIEZAS.map((p) => {
   escena.appendChild(a);
 
 
-  const card = document.createElement("section");
-  card.className = "cat"; card.id = "cat-" + p.id;
-  card.innerHTML = "<h3><svg viewBox='0 0 48 48' aria-hidden='true'>" + p.icono + "</svg>" + p.nombre +
-    "</h3><p>" + p.desc + "</p><span class='pronto'>Listado completo próximamente</span>";
-  grilla.appendChild(card);
   return {cfg:p, el:a};
 });
 
@@ -343,15 +480,257 @@ function pintar(){
   });
 }
 
-let pedido = false;
+let enCola = false;
 addEventListener("scroll", () => {
-  if (pedido) return;
-  pedido = true;
-  requestAnimationFrame(() => { pedido = false; pintar(); });
+  if (enCola) return;
+  enCola = true;
+  requestAnimationFrame(() => { enCola = false; pintar(); });
 }, {passive:true});
 addEventListener("resize", medir);
 addEventListener("load", medir);
 medir();
+
+/* ============================================================
+   CATÁLOGO DE EJEMPLO
+   Códigos y descripciones reales de la lista de precios.
+   Las imágenes son dibujos de referencia: se reemplazan por fotos.
+   ============================================================ */
+const PRODUCTOS = {
+  filtros: [
+    {cod:"MR152",  marca:"Mannol", tipo:"aire",        desc:"Filtro de aire · Chevrolet Corsa 1,4 / 1,6 16v"},
+    {cod:"MR289",  marca:"Mannol", tipo:"aire",        desc:"Filtro de aire · Chevrolet Corsa / Meriva 1,7 TD - 1,8 16v"},
+    {cod:"MAP121", marca:"Mannol", tipo:"aceite",      desc:"Filtro de aceite · Gacel / Carat / Senda nafta / Gol / Galaxy"},
+    {cod:"MAP137", marca:"Mannol", tipo:"aceite",      desc:"Filtro de aceite · Renault 9 / 11 1400 / Gol GL / Escort 1.8 / Saveiro"},
+    {cod:"MC033",  marca:"Mannol", tipo:"combustible", desc:"Filtro de combustible · Toyota Hilux 2,4 - 2,8 TD 2015 en adelante"},
+    {cod:"MH205",  marca:"Mannol", tipo:"habitaculo",  desc:"Filtro de habitáculo · Fiat Palio / Siena fase III - Idea"},
+  ],
+  aceite: [
+    {cod:"01.0.45.42", marca:"Gulf",    tipo:"bidon4", desc:"Gulf Formula GVX 5W-30 SN · 4 litros"},
+    {cod:"01.0.45.41", marca:"Gulf",    tipo:"bidon1", desc:"Gulf Formula GVX 5W-30 SN · 1 litro"},
+    {cod:"01.0.40.43", marca:"Gulf",    tipo:"bidon4", desc:"Gulf Formula G 5W-40 SN · 4 litros"},
+    {cod:"01.0.21.47", marca:"Gulf",    tipo:"bidon4", desc:"Gulf Tec Plus 10W-40 SL · 4 litros"},
+    {cod:"CE5304",     marca:"Castrol", tipo:"bidon4", desc:"Castrol Edge Professional 5W-30 · 4 litros"},
+    {cod:"CE5301",     marca:"Castrol", tipo:"bidon1", desc:"Castrol Edge Professional 5W-30 · 1 litro"},
+  ],
+  refrigerante: [
+    {cod:"01.5.25.41", marca:"Gulf",      tipo:"refri1", desc:"Gulf Antifreeze + Coolant verde · 1 litro"},
+    {cod:"01.5.25.20", marca:"Gulf",      tipo:"refri20",desc:"Gulf Antifreeze + Coolant verde · 20 litros"},
+    {cod:"CROA1",      marca:"Castrol",   tipo:"refri1", desc:"Castrol refrigerante Radicool SF-0"},
+    {cod:"RX5",        marca:"Hidroquim", tipo:"refri5", desc:"Refrigerante diluido · 5 litros"},
+    {cod:"19242091",   marca:"ACDelco",   tipo:"refri1", desc:"Refrigerante ACDelco · 1 litro"},
+  ],
+  pastillas: [
+    {cod:"3068M", marca:"Mazfren", tipo:"pastillas", desc:"Pastillas de freno · Chevrolet Corsa"},
+    {cod:"3064M", marca:"Mazfren", tipo:"pastillas", desc:"Pastillas de freno · Ford Fiesta / Ka"},
+    {cod:"3074M", marca:"Mazfren", tipo:"pastillas", desc:"Pastillas de freno · Toyota Hilux"},
+    {cod:"3061M", marca:"Mazfren", tipo:"pastillas", desc:"Pastillas de freno · VW Senda diésel / Gol '94"},
+    {cod:"3028M", marca:"Mazfren", tipo:"pastillas", desc:"Pastillas de freno · VW Passat / Senda / Saveiro / Gol"},
+  ],
+  escobillas: [
+    {cod:"TR17160", marca:"Trico", tipo:"escobilla", desc:"Escobilla 16\" · conexión específica original"},
+    {cod:"TR17180", marca:"Trico", tipo:"escobilla", desc:"Escobilla 18\" · conexión específica original"},
+    {cod:"TR17190", marca:"Trico", tipo:"escobilla", desc:"Escobilla 19\" · conexión específica original"},
+    {cod:"TR17200", marca:"Trico", tipo:"escobilla", desc:"Escobilla 20\" · conexión específica original"},
+    {cod:"TR17210", marca:"Trico", tipo:"escobilla", desc:"Escobilla 21\" · conexión específica original"},
+  ],
+  aditivos: [
+    {cod:"92540",      marca:"Locx",    tipo:"aditivo", desc:"Limpia inyector nafta"},
+    {cod:"92541",      marca:"Locx",    tipo:"aditivo", desc:"Limpia inyector diésel"},
+    {cod:"92486",      marca:"Locx",    tipo:"aditivo", desc:"Booster nafta · elevador de octanos"},
+    {cod:"MOT107812",  marca:"Motul",   tipo:"aditivo", desc:"Super Octane Booster · nafta"},
+    {cod:"W65269",     marca:"Wynn's",  tipo:"aditivo", desc:"Octane Plus +99 · 180 ml"},
+    {cod:"FC PLUS",    marca:"Molykote",tipo:"aditivo", desc:"Aditivo antifricción para cajas y diferenciales"},
+  ],
+  estetica: [
+    {cod:"210108.", marca:"Rino",   tipo:"botella", desc:"Lavacoche con cera HD · 550 cc"},
+    {cod:"210153.", marca:"Rino",   tipo:"botella", desc:"Carnauba Wax · 550 cc"},
+    {cod:"320",     marca:"Jarama", tipo:"botella", desc:"Silicona líquida · 125 cm³ surtidas"},
+    {cod:"3420.",   marca:"Jarama", tipo:"spray",   desc:"Silicona en aerosol 440 cm³ · caja x 12"},
+    {cod:"COS002",  marca:"Oregon", tipo:"pano",    desc:"Paño de microfibra · pack x 4"},
+    {cod:"COS015",  marca:"Oregon", tipo:"pano",    desc:"Paño de microfibra 70 x 30 cm"},
+  ],
+};
+
+/* Dibujos de referencia por tipo de producto (SVG, viewBox 0 0 120 90). */
+const DIBUJOS = {
+  aire: '<rect x="14" y="22" width="92" height="46" rx="5" fill="#d9dde1"/><rect x="20" y="28" width="80" height="34" fill="#f2efe6"/>' +
+        Array.from({length:13},(_,i)=>'<path d="M'+(23+i*6)+' 28v34" stroke="#c8c1ae" stroke-width="2"/>').join(""),
+  aceite: '<rect x="38" y="16" width="44" height="60" rx="8" fill="#2f6fb3"/><rect x="38" y="16" width="44" height="12" rx="6" fill="#1f4f84"/><rect x="44" y="40" width="32" height="18" rx="3" fill="#fff" opacity=".85"/><ellipse cx="60" cy="76" rx="22" ry="4" fill="#173c64"/>',
+  combustible: '<rect x="30" y="34" width="60" height="26" rx="10" fill="#c9ced3"/><rect x="18" y="42" width="14" height="10" rx="3" fill="#8b949c"/><rect x="88" y="42" width="14" height="10" rx="3" fill="#8b949c"/><rect x="48" y="38" width="24" height="18" rx="3" fill="#2f6fb3"/>',
+  habitaculo: '<path d="M14 30l92-6v38l-92 6z" fill="#e8e3d6"/>' +
+        Array.from({length:12},(_,i)=>'<path d="M'+(20+i*7.5)+' '+(29.6-i*0.5)+'v38" stroke="#9fb0a0" stroke-width="2"/>').join(""),
+  bidon4: '<path d="M30 22h40l10 10v46H30z" fill="#e6a414"/><rect x="66" y="12" width="12" height="10" rx="2" fill="#333"/><rect x="36" y="40" width="38" height="24" rx="3" fill="#fff" opacity=".9"/><path d="M80 32h6a6 6 0 0 1 6 6v12h-6V38h-6z" fill="#c98c0d"/>',
+  bidon1: '<path d="M44 26h26l6 8v42H44z" fill="#e6a414"/><rect x="58" y="16" width="10" height="10" rx="2" fill="#333"/><rect x="48" y="44" width="24" height="20" rx="3" fill="#fff" opacity=".9"/>',
+  refri1: '<path d="M44 26h26l6 8v42H44z" fill="#3fbf6f"/><rect x="58" y="16" width="10" height="10" rx="2" fill="#f2f2f2"/><rect x="48" y="44" width="24" height="20" rx="3" fill="#fff" opacity=".85"/>',
+  refri5: '<path d="M30 22h40l10 10v46H30z" fill="#3fbf6f"/><rect x="66" y="12" width="12" height="10" rx="2" fill="#f2f2f2"/><rect x="36" y="40" width="38" height="24" rx="3" fill="#fff" opacity=".85"/>',
+  refri20:'<rect x="28" y="16" width="64" height="62" rx="6" fill="#3fbf6f"/><rect x="40" y="10" width="14" height="8" rx="2" fill="#f2f2f2"/><rect x="66" y="10" width="18" height="10" rx="4" fill="#2c9a55"/><rect x="38" y="36" width="44" height="26" rx="3" fill="#fff" opacity=".85"/>',
+  pastillas: '<path d="M18 50c14-22 70-22 84 0l-8 10c-12-14-56-14-68 0z" fill="#5b6066"/><path d="M24 50c12-16 60-16 72 0l-6 6c-10-10-50-10-60 0z" fill="#2c2f33"/><path d="M22 66c14-12 62-12 76 0l-6 8c-12-8-52-8-64 0z" fill="#5b6066"/>',
+  escobilla: '<path d="M10 58L108 30" stroke="#22262b" stroke-width="7" stroke-linecap="round"/><path d="M12 63L108 36" stroke="#3a4048" stroke-width="3" stroke-linecap="round"/><rect x="54" y="38" width="16" height="12" rx="2" transform="rotate(-16 62 44)" fill="#11a0d8"/>',
+  aditivo: '<rect x="46" y="26" width="28" height="50" rx="8" fill="#c0392b"/><rect x="52" y="14" width="16" height="14" rx="3" fill="#222"/><rect x="50" y="42" width="20" height="20" rx="2" fill="#fff" opacity=".9"/>',
+  botella: '<path d="M46 30h28v46H46z" fill="#2f86d1"/><path d="M52 18h14v12H52z" fill="#e9e9e9"/><path d="M60 18h12l4 6h-16z" fill="#e9e9e9"/><rect x="50" y="44" width="20" height="20" rx="2" fill="#fff" opacity=".9"/>',
+  spray: '<rect x="48" y="28" width="24" height="50" rx="5" fill="#8e44ad"/><rect x="52" y="18" width="16" height="10" rx="2" fill="#ddd"/><rect x="56" y="12" width="8" height="6" fill="#999"/><rect x="51" y="44" width="18" height="18" rx="2" fill="#fff" opacity=".9"/>',
+  pano: '<path d="M22 30h70l8 10-8 34H30l-8-10z" fill="#f5a623"/><path d="M30 74l-8-10V30" stroke="#d48a0d" stroke-width="2" fill="none"/>' +
+        Array.from({length:6},(_,i)=>'<path d="M'+(32+i*11)+' 34v36" stroke="#e5951a" stroke-width="1.5"/>').join(""),
+};
+
+/* ---------- cliente por link personal ----------
+   En la versión final cada cliente tiene su código. ?c=demo es de prueba. */
+const CLIENTES = {demo:"Lubricentro de prueba"};
+const qs = new URLSearchParams(location.search);
+const codCliente = (qs.get("c") || "").trim();
+const nombreFijo = CLIENTES[codCliente] || "";
+const CLAVE = "pedido:" + (codCliente || "sin-cliente");
+
+const leer = () => { try { return JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch(e) { return {}; } };
+let pedido = leer();                       // { codigo: cantidad }
+const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(pedido)); } catch(e) {} };
+
+const INDICE = {};                         // codigo -> {producto, categoria}
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- armar el catálogo ---------- */
+const atajos = document.getElementById("atajos");
+PIEZAS.forEach(cat => {
+  const lista = PRODUCTOS[cat.id] || [];
+  const sec = document.createElement("section");
+  sec.className = "cat"; sec.id = "cat-" + cat.id;
+  sec.innerHTML = "<h3><svg viewBox='0 0 48 48' aria-hidden='true'>" + cat.icono + "</svg>" + esc(cat.nombre) +
+    "</h3><p>" + esc(cat.desc) + "</p><div class='prods'></div>";
+  const cont = sec.querySelector(".prods");
+  lista.forEach(p => {
+    INDICE[p.cod] = {p, cat:cat.nombre};
+    const t = document.createElement("article");
+    t.className = "prod";
+    t.dataset.busca = (p.cod + " " + p.marca + " " + p.desc + " " + cat.nombre).toLowerCase();
+    t.innerHTML =
+      '<div class="img"><svg viewBox="0 0 120 90" aria-hidden="true">' + (DIBUJOS[p.tipo] || "") + '</svg><small>IMAGEN DE REFERENCIA</small></div>' +
+      '<div class="info"><span class="marca-p">' + esc(p.marca) + '</span><span class="cod">' + esc(p.cod) + '</span>' +
+      '<span class="desc">' + esc(p.desc) + '</span>' +
+      '<div class="accion"><div class="cant"><button type="button" data-d="-1" aria-label="Menos">−</button>' +
+      '<input type="number" min="1" value="1" inputmode="numeric" aria-label="Cantidad"><button type="button" data-d="1" aria-label="Más">+</button></div>' +
+      '<button type="button" class="agregar">Agregar</button></div>' +
+      '<span class="en-pedido" data-cod="' + esc(p.cod) + '"></span></div>';
+    const inp = t.querySelector("input");
+    t.querySelectorAll(".cant button").forEach(b => b.onclick = () => {
+      inp.value = Math.max(1, (parseInt(inp.value, 10) || 1) + Number(b.dataset.d));
+    });
+    t.querySelector(".agregar").onclick = () => {
+      const n = Math.max(1, parseInt(inp.value, 10) || 1);
+      pedido[p.cod] = (pedido[p.cod] || 0) + n;
+      inp.value = 1;
+      guardar(); refrescar();
+      avisar("Agregado: " + n + " × " + p.cod);
+    };
+    cont.appendChild(t);
+  });
+  grilla.appendChild(sec);
+
+  const at = document.createElement("a");
+  at.href = "#cat-" + cat.id; at.textContent = cat.nombre;
+  atajos.appendChild(at);
+});
+
+/* ---------- buscador ---------- */
+document.getElementById("buscador").addEventListener("input", e => {
+  const q = e.target.value.trim().toLowerCase();
+  let hay = 0;
+  document.querySelectorAll(".cat").forEach(sec => {
+    let vis = 0;
+    sec.querySelectorAll(".prod").forEach(t => {
+      const ok = !q || q.split(/\s+/).every(w => t.dataset.busca.includes(w));
+      t.style.display = ok ? "" : "none"; if (ok) vis++;
+    });
+    sec.style.display = vis ? "" : "none"; hay += vis;
+  });
+  document.getElementById("sin-res").style.display = hay ? "none" : "block";
+});
+
+/* ---------- panel del pedido ---------- */
+const panel = document.getElementById("panel"), capa = document.getElementById("capa");
+const listaEl = document.getElementById("lista"), clienteEl = document.getElementById("cliente");
+const resumen = document.getElementById("resumen"), enviar = document.getElementById("enviar");
+const pie = document.getElementById("pie"), listo = document.getElementById("listo");
+
+clienteEl.innerHTML = nombreFijo
+  ? "Pedido de <b>" + esc(nombreFijo) + "</b>"
+  : 'Tu comercio<input id="nom" type="text" placeholder="Nombre del lubricentro o comercio" autocomplete="organization">';
+const nomInput = document.getElementById("nom");
+if (nomInput){
+  try { nomInput.value = localStorage.getItem("pedido:nombre") || ""; } catch(e) {}
+  nomInput.addEventListener("input", () => { try { localStorage.setItem("pedido:nombre", nomInput.value); } catch(e) {} refrescar(); });
+}
+
+function abrir(){ panel.classList.add("abierto"); capa.classList.add("abierto"); panel.setAttribute("aria-hidden","false"); }
+function cerrar(){ panel.classList.remove("abierto"); capa.classList.remove("abierto"); panel.setAttribute("aria-hidden","true"); }
+document.getElementById("btn-pedido").onclick = abrir;
+document.getElementById("cerrar").onclick = cerrar;
+capa.onclick = cerrar;
+addEventListener("keydown", e => { if (e.key === "Escape") cerrar(); });
+
+function refrescar(){
+  const cods = Object.keys(pedido).filter(c => pedido[c] > 0 && INDICE[c]);
+  const unidades = cods.reduce((s, c) => s + pedido[c], 0);
+  document.getElementById("n-pedido").textContent = cods.length;
+
+  document.querySelectorAll(".en-pedido").forEach(s => {
+    const n = pedido[s.dataset.cod]; s.textContent = n ? "✔ En el pedido: " + n : "";
+  });
+
+  if (!cods.length){
+    listaEl.innerHTML = '<p class="vacio">Todavía no agregaste productos.</p>';
+  } else {
+    listaEl.innerHTML = cods.map(c => {
+      const p = INDICE[c].p;
+      return '<div class="item"><span class="cod">' + esc(c) + ' · ' + esc(p.marca) + '</span>' +
+        '<div class="cant"><button type="button" data-c="' + esc(c) + '" data-d="-1" aria-label="Menos">−</button>' +
+        '<input type="number" min="1" value="' + pedido[c] + '" data-c="' + esc(c) + '" aria-label="Cantidad">' +
+        '<button type="button" data-c="' + esc(c) + '" data-d="1" aria-label="Más">+</button></div>' +
+        '<span class="desc">' + esc(p.desc) + '</span>' +
+        '<button type="button" class="quitar" data-q="' + esc(c) + '">Quitar</button></div>';
+    }).join("");
+    listaEl.querySelectorAll("button[data-d]").forEach(b => b.onclick = () => {
+      const c = b.dataset.c; pedido[c] = Math.max(1, pedido[c] + Number(b.dataset.d)); guardar(); refrescar();
+    });
+    listaEl.querySelectorAll("input[data-c]").forEach(i => i.onchange = () => {
+      pedido[i.dataset.c] = Math.max(1, parseInt(i.value, 10) || 1); guardar(); refrescar();
+    });
+    listaEl.querySelectorAll("button[data-q]").forEach(b => b.onclick = () => {
+      delete pedido[b.dataset.q]; guardar(); refrescar();
+    });
+  }
+  resumen.textContent = cods.length ? cods.length + " productos · " + unidades + " unidades en total" : "";
+  const nombre = nombreFijo || (nomInput ? nomInput.value.trim() : "");
+  enviar.disabled = !cods.length || !nombre;
+  enviar.textContent = cods.length && !nombre ? "Escribí el nombre de tu comercio" : "Enviar pedido";
+}
+
+enviar.onclick = () => {
+  const nombre = nombreFijo || nomInput.value.trim();
+  const cods = Object.keys(pedido).filter(c => pedido[c] > 0 && INDICE[c]);
+  const nota = document.getElementById("nota").value.trim();
+  const fecha = new Date().toLocaleString("es-AR", {dateStyle:"short", timeStyle:"short"});
+  const txt = "Cliente: " + nombre + "\nFecha: " + fecha + "\n\n" +
+    cods.map(c => pedido[c] + "  " + c + "  " + INDICE[c].p.desc).join("\n") +
+    (nota ? "\n\nNota: " + nota : "");
+  document.getElementById("listo-txt").textContent = txt;
+  pie.style.display = "none"; listaEl.style.display = "none"; clienteEl.style.display = "none";
+  listo.style.display = "block";
+  pedido = {}; guardar(); refrescar();
+  document.getElementById("nota").value = "";
+};
+document.getElementById("nuevo").onclick = () => {
+  listo.style.display = "none"; pie.style.display = ""; listaEl.style.display = ""; clienteEl.style.display = "";
+  cerrar();
+};
+
+let tAviso;
+function avisar(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("ver");
+  clearTimeout(tAviso); tAviso = setTimeout(() => t.classList.remove("ver"), 1600);
+}
+
+refrescar();
 </script>
 </body>
 </html>
