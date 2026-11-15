@@ -4,12 +4,13 @@ Página de inicio del catálogo: un auto en el centro y, al hacer scroll, las l�
 
 Un solo archivo `index.html`, sin librerías.
 
-## Cómo poner la foto del auto de verdad
+## Cómo funciona la escena
 
-1. Conseguí una foto de un auto de calle, **de costado y mirando a la derecha**, con fondo transparente o limpio (sirve Pexels o Unsplash, que son gratis).
-2. Guardala como `auto.png` junto a `index.html`.
+Son dos capas de la misma foto: `fondo.jpg` (la foto completa: ruta, guardarraíl, árboles) y `auto.png` (el auto recortado, sin fondo). Al bajar, el fondo se agranda despacio y el auto más rápido, y eso da la sensación de que la cámara se acerca. Cuando el auto queda en primer plano, el fondo se oscurece y salen las piezas.
 
-Listo. La página la usa sola; si el archivo no está, muestra el dibujo.
+En las dos capas la patente y el parabrisas están difuminados.
+
+Para cambiar de foto hay que regenerar las dos capas y actualizar en `index.html` la línea `const AUTO = …` con la posición del auto dentro de la foto. Pedíselo a Claude con la foto nueva.
 
 ## Cómo poner las fotos de los productos
 
