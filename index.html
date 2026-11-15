@@ -224,6 +224,8 @@
   }
   #enviar:disabled{opacity:.4;cursor:not-allowed}
   #aviso-demo{font-size:.75rem;color:var(--texto-2);text-align:center}
+  #error-envio{font-size:.85rem;color:#ffb4a8;text-align:center}
+  #error-envio:empty{display:none}
   #listo{display:none;padding:28px 18px;text-align:center;flex:1;overflow-y:auto}
   #listo .ok{font-size:2.4rem}
   #listo h3{margin:6px 0 8px}
@@ -300,12 +302,13 @@
     <textarea id="nota" placeholder="Nota para el depósito (opcional): horario de entrega, aclaraciones…"></textarea>
     <div id="resumen"></div>
     <button id="enviar" type="button">Enviar pedido</button>
+    <div id="error-envio" role="alert"></div>
     <div id="aviso-demo">Versión de prueba: el pedido todavía no se envía al depósito.</div>
   </div>
   <div id="listo">
     <div class="ok">✔</div>
-    <h3>Pedido armado</h3>
-    <p>En la versión final, este pedido llega directo a la planilla del depósito con tu nombre. En esta prueba no se envía: abajo ves cómo llegaría.</p>
+    <h3 id="listo-tit">Pedido armado</h3>
+    <p id="listo-p">En la versión final, este pedido llega directo a la planilla del depósito con tu nombre. En esta prueba no se envía: abajo ves cómo llegaría.</p>
     <pre id="listo-txt"></pre>
     <button id="nuevo" type="button">Armar otro pedido</button>
   </div>
@@ -573,12 +576,17 @@ const DIBUJOS = {
         Array.from({length:6},(_,i)=>'<path d="M'+(32+i*11)+' 34v36" stroke="#e5951a" stroke-width="1.5"/>').join(""),
 };
 
+/* ---------- envío de pedidos ----------
+   URL_PEDIDOS: la dirección de la app web de la planilla (Implementar > App web).
+   Si está vacía, la página funciona en modo prueba y no envía nada. */
+const URL_PEDIDOS = "";
+
 /* ---------- cliente por link personal ----------
-   En la versión final cada cliente tiene su código. ?c=demo es de prueba. */
-const CLIENTES = {demo:"Lubricentro de prueba"};
+   Cada cliente tiene su código en la hoja Clientes. ?c=demo es de prueba. */
 const qs = new URLSearchParams(location.search);
 const codCliente = (qs.get("c") || "").trim();
-const nombreFijo = CLIENTES[codCliente] || "";
+let nombreFijo = codCliente === "demo" ? "Lubricentro de prueba" : "";
+let linkMalo = false;
 const CLAVE = "pedido:" + (codCliente || "sin-cliente");
 
 const leer = () => { try { return JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch(e) { return {}; } };
@@ -651,9 +659,21 @@ const listaEl = document.getElementById("lista"), clienteEl = document.getElemen
 const resumen = document.getElementById("resumen"), enviar = document.getElementById("enviar");
 const pie = document.getElementById("pie"), listo = document.getElementById("listo");
 
-clienteEl.innerHTML = nombreFijo
-  ? "Pedido de <b>" + esc(nombreFijo) + "</b>"
-  : 'Tu comercio<input id="nom" type="text" placeholder="Nombre del lubricentro o comercio" autocomplete="organization">';
+function pintarCliente(){
+  if (nombreFijo) clienteEl.innerHTML = "Pedido de <b>" + esc(nombreFijo) + "</b>";
+  else if (linkMalo) clienteEl.innerHTML = "<b>Este link no es válido.</b> Pedile al depósito tu link personal.";
+  else if (codCliente && URL_PEDIDOS) clienteEl.innerHTML = "Buscando tu cuenta…";
+}
+if (codCliente && (nombreFijo || URL_PEDIDOS)) pintarCliente();
+else clienteEl.innerHTML = 'Tu comercio<input id="nom" type="text" placeholder="Nombre del lubricentro o comercio" autocomplete="organization">';
+if (codCliente && codCliente !== "demo" && URL_PEDIDOS){
+  fetch(URL_PEDIDOS + "?c=" + encodeURIComponent(codCliente))
+    .then(r => r.json())
+    .then(d => { if (d.ok) nombreFijo = d.nombre; else linkMalo = true; })
+    .catch(() => { clienteEl.innerHTML = "No pudimos verificar tu cuenta. Revisá la conexión y recargá la página."; return "x"; })
+    .then(x => { if (x !== "x") pintarCliente(); refrescar(); });
+}
+document.getElementById("aviso-demo").style.display = URL_PEDIDOS ? "none" : "";
 const nomInput = document.getElementById("nom");
 if (nomInput){
   try { nomInput.value = localStorage.getItem("pedido:nombre") || ""; } catch(e) {}
@@ -700,23 +720,53 @@ function refrescar(){
   }
   resumen.textContent = cods.length ? cods.length + " productos · " + unidades + " unidades en total" : "";
   const nombre = nombreFijo || (nomInput ? nomInput.value.trim() : "");
-  enviar.disabled = !cods.length || !nombre;
-  enviar.textContent = cods.length && !nombre ? "Escribí el nombre de tu comercio" : "Enviar pedido";
+  enviar.disabled = !cods.length || !nombre || linkMalo || enviando;
+  enviar.textContent = enviando ? "Enviando…" : (cods.length && !nombre && nomInput ? "Escribí el nombre de tu comercio" : "Enviar pedido");
+}
+
+let enviando = false;
+const errorEl = document.getElementById("error-envio");
+
+function mostrarListo(titulo, parrafo, txt){
+  document.getElementById("listo-tit").textContent = titulo;
+  document.getElementById("listo-p").textContent = parrafo;
+  document.getElementById("listo-txt").textContent = txt;
+  pie.style.display = "none"; listaEl.style.display = "none"; clienteEl.style.display = "none";
+  listo.style.display = "block";
+  pedido = {}; guardar(); refrescar();
+  document.getElementById("nota").value = "";
 }
 
 enviar.onclick = () => {
-  const nombre = nombreFijo || nomInput.value.trim();
+  const nombre = nombreFijo || (nomInput ? nomInput.value.trim() : "");
   const cods = Object.keys(pedido).filter(c => pedido[c] > 0 && INDICE[c]);
   const nota = document.getElementById("nota").value.trim();
   const fecha = new Date().toLocaleString("es-AR", {dateStyle:"short", timeStyle:"short"});
   const txt = "Cliente: " + nombre + "\nFecha: " + fecha + "\n\n" +
     cods.map(c => pedido[c] + "  " + c + "  " + INDICE[c].p.desc).join("\n") +
     (nota ? "\n\nNota: " + nota : "");
-  document.getElementById("listo-txt").textContent = txt;
-  pie.style.display = "none"; listaEl.style.display = "none"; clienteEl.style.display = "none";
-  listo.style.display = "block";
-  pedido = {}; guardar(); refrescar();
-  document.getElementById("nota").value = "";
+  errorEl.textContent = "";
+
+  if (!URL_PEDIDOS){
+    mostrarListo("Pedido armado",
+      "En la versión final, este pedido llega directo a la planilla del depósito con tu nombre. En esta prueba no se envía: abajo ves cómo llegaría.", txt);
+    return;
+  }
+
+  enviando = true; refrescar();
+  const datos = {
+    c: codCliente, nombre: nombre, nota: nota,
+    items: cods.map(c => ({cod: c, cant: pedido[c], desc: INDICE[c].p.desc}))
+  };
+  // Se manda como texto simple para que el navegador no pida permisos extra al servidor de Google.
+  fetch(URL_PEDIDOS, {method: "POST", body: JSON.stringify(datos)})
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) mostrarListo("Pedido enviado", "El depósito ya recibió tu pedido N° " + d.numero + ". Te confirmamos por los canales de siempre.", txt);
+      else errorEl.textContent = d.error || "No se pudo enviar el pedido.";
+    })
+    .catch(() => { errorEl.textContent = "No se pudo enviar. Revisá la conexión y probá de nuevo: tu pedido sigue guardado."; })
+    .finally(() => { enviando = false; refrescar(); });
 };
 document.getElementById("nuevo").onclick = () => {
   listo.style.display = "none"; pie.style.display = ""; listaEl.style.display = ""; clienteEl.style.display = "";
