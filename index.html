@@ -13,7 +13,6 @@
     --texto-2:#9fb0bd;
     --acento:#f5a623;
     --acento-2:#ffd27a;
-    --linea:#ffd27a;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -71,8 +70,6 @@
     position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform,filter;
     display:block;max-width:none;
   }
-  #lineas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-  #lineas line{stroke:var(--linea);stroke-width:1.5;stroke-dasharray:4 5}
 
   #titulo{
     position:absolute;left:0;right:0;top:84px;z-index:5;text-align:center;
@@ -157,7 +154,6 @@
     <div id="velo" aria-hidden="true"></div>
     <div id="sombra" aria-hidden="true"></div>
     <img id="auto" src="auto.png" alt="" aria-hidden="true">
-    <svg id="lineas" aria-hidden="true"></svg>
 
     <div id="titulo">
       <h1>Todo lo que tu lubricentro necesita</h1>
@@ -229,7 +225,6 @@ const escena = document.getElementById("escena");
 const fondo  = document.getElementById("fondo");
 const auto   = document.getElementById("auto");
 const velo   = document.getElementById("velo");
-const svgL   = document.getElementById("lineas");
 const tit1   = document.getElementById("titulo");
 const tit2   = document.getElementById("titulo2");
 const aviso  = document.getElementById("aviso");
@@ -248,15 +243,13 @@ const nodos = PIEZAS.map((p) => {
   img.onerror = () => img.remove();
   escena.appendChild(a);
 
-  const ln = document.createElementNS("http://www.w3.org/2000/svg", "line");
-  svgL.appendChild(ln);
 
   const card = document.createElement("section");
   card.className = "cat"; card.id = "cat-" + p.id;
   card.innerHTML = "<h3><svg viewBox='0 0 48 48' aria-hidden='true'>" + p.icono + "</svg>" + p.nombre +
     "</h3><p>" + p.desc + "</p><span class='pronto'>Listado completo próximamente</span>";
   grilla.appendChild(card);
-  return {cfg:p, el:a, linea:ln};
+  return {cfg:p, el:a};
 });
 
 /* ---------- cálculo de la escena ---------- */
@@ -302,7 +295,6 @@ function medir(){
   G = {vw, vh, cel, cw, ch, ax, ay, ini, fin, scAuto, scFondo};
   fondo.style.width = cw + "px"; fondo.style.height = ch + "px";
   auto.style.width = (AUTO.w * cw) + "px";
-  svgL.setAttribute("viewBox", "0 0 " + vw + " " + vh);
   pintar();
 }
 
@@ -348,9 +340,6 @@ function pintar(){
     n.el.style.transform = "translate(" + x + "px," + y + "px) scale(" + lerp(.25, 1, clamp(te * 1.5)) + ")";
     n.el.style.opacity = clamp(te * 4);
     n.el.style.pointerEvents = te > .6 ? "auto" : "none";
-    n.linea.setAttribute("x1", ox); n.linea.setAttribute("y1", oy);
-    n.linea.setAttribute("x2", x);  n.linea.setAttribute("y2", y);
-    n.linea.style.opacity = clamp((te - .1) * 2) * .8;
   });
 }
 
