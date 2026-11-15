@@ -681,7 +681,13 @@ if (nomInput){
 }
 
 function abrir(){ panel.classList.add("abierto"); capa.classList.add("abierto"); panel.setAttribute("aria-hidden","false"); }
-function cerrar(){ panel.classList.remove("abierto"); capa.classList.remove("abierto"); panel.setAttribute("aria-hidden","true"); }
+function cerrar(){
+  panel.classList.remove("abierto"); capa.classList.remove("abierto"); panel.setAttribute("aria-hidden","true");
+  // Si se estaba mostrando un pedido ya enviado, al cerrar queda listo para uno nuevo
+  if (listo.style.display === "block"){
+    listo.style.display = "none"; pie.style.display = ""; listaEl.style.display = ""; clienteEl.style.display = "";
+  }
+}
 document.getElementById("btn-pedido").onclick = abrir;
 document.getElementById("cerrar").onclick = cerrar;
 capa.onclick = cerrar;
@@ -768,10 +774,7 @@ enviar.onclick = () => {
     .catch(() => { errorEl.textContent = "No se pudo enviar. Revisá la conexión y probá de nuevo: tu pedido sigue guardado."; })
     .finally(() => { enviando = false; refrescar(); });
 };
-document.getElementById("nuevo").onclick = () => {
-  listo.style.display = "none"; pie.style.display = ""; listaEl.style.display = ""; clienteEl.style.display = "";
-  cerrar();
-};
+document.getElementById("nuevo").onclick = cerrar;
 
 let tAviso;
 function avisar(msg){
