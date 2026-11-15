@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Catálogo del depósito</title>
+<style>
+  :root{
+    --fondo:#101418;
+    --fondo-2:#161c22;
+    --carta:#1d242c;
+    --borde:#2c3640;
+    --texto:#eef2f5;
+    --texto-2:#9fb0bd;
+    --acento:#f5a623;
+    --acento-2:#ffd27a;
+    --linea:#4a5864;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--fondo);
+    color:var(--texto);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    font-size:16px;
+    line-height:1.5;
+  }
+  a{color:inherit}
+
+  /* ---------- barra superior ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));
+    background:rgba(16,20,24,.85);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--borde);
+  }
+  .marca{font-weight:700;letter-spacing:.04em}
+  .marca small{display:block;font-weight:400;color:var(--texto-2);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase}
+  header nav{display:flex;gap:14px;font-size:.9rem}
+  header nav a{color:var(--texto-2);text-decoration:none}
+  header nav a:hover{color:var(--texto)}
+  @media(max-width:700px){header nav{display:none}}
+
+  /* ---------- héroe con scroll ---------- */
+  #pista{height:420vh;position:relative}
+  #escena{
+    position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:
+      radial-gradient(1200px 500px at 50% 115%, #1c2630 0%, transparent 60%),
+      linear-gradient(180deg,var(--fondo) 0%,var(--fondo-2) 100%);
+  }
+  #titulo{
+    position:absolute;top:70px;left:0;right:0;text-align:center;z-index:5;
+    padding:0 max(16px,env(safe-area-inset-left,0px)) 0 max(16px,env(safe-area-inset-right,0px));
+  }
+  #titulo h1{margin:0 0 6px;font-size:clamp(1.5rem,4.5vw,2.6rem);text-wrap:balance}
+  #titulo p{margin:0;color:var(--texto-2);font-size:clamp(.9rem,2.5vw,1.05rem)}
+  #pista-aviso{
+    position:absolute;bottom:18px;left:0;right:0;text-align:center;color:var(--texto-2);
+    font-size:.85rem;z-index:5;transition:opacity .3s
+  }
+  #pista-aviso .flecha{display:block;font-size:1.3rem;animation:bajar 1.6s infinite}
+  @keyframes bajar{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+  #lienzo{position:relative;width:min(92vw,980px);aspect-ratio:9/5;max-height:72vh}
+  #auto{
+    position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);
+    width:78%;will-change:transform,opacity;
+  }
+  #auto img,#auto svg{width:100%;height:auto;display:block}
+  #foto-auto{display:none}
+
+  #lineas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+  #lineas line{stroke:var(--linea);stroke-width:1.5;stroke-dasharray:4 4;opacity:0}
+
+  .pieza{
+    position:absolute;left:0;top:0;z-index:10;
+    width:124px;margin-left:-62px;margin-top:-62px;
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    text-decoration:none;opacity:0;will-change:transform,opacity;
+  }
+  .pieza .disco{
+    width:84px;height:84px;border-radius:50%;
+    background:var(--carta);border:1.5px solid var(--borde);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 10px 24px rgba(0,0,0,.45);
+    overflow:hidden;transition:border-color .2s,transform .2s;
+  }
+  .pieza img{width:100%;height:100%;object-fit:cover;display:none}
+  .pieza svg{width:46px;height:46px}
+  .pieza .nombre{
+    font-size:.8rem;text-align:center;color:var(--texto);
+    background:rgba(16,20,24,.75);padding:3px 10px;border-radius:999px;
+    border:1px solid var(--borde);white-space:nowrap;
+  }
+  .pieza:hover .disco{border-color:var(--acento);transform:scale(1.07)}
+  @media(max-width:700px){
+    .pieza{width:96px;margin-left:-48px;margin-top:-48px}
+    .pieza .disco{width:64px;height:64px}
+    .pieza svg{width:36px;height:36px}
+    .pieza .nombre{font-size:.68rem;padding:2px 8px}
+    #lienzo{aspect-ratio:auto;height:62svh;max-height:none}
+    #auto{top:46%}
+  }
+
+  /* ---------- categorías ---------- */
+  main{
+    max-width:1060px;margin:0 auto;
+    padding:48px max(16px,env(safe-area-inset-right,0px)) 80px max(16px,env(safe-area-inset-left,0px));
+  }
+  main h2{font-size:clamp(1.3rem,3vw,1.8rem);margin:0 0 8px;text-wrap:balance}
+  main>p{color:var(--texto-2);margin:0 0 28px;max-width:62ch}
+  #grilla{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+  .cat{
+    background:var(--carta);border:1px solid var(--borde);border-radius:14px;
+    padding:18px;scroll-margin-top:90px;min-width:0;
+  }
+  .cat h3{margin:0 0 6px;font-size:1.05rem;display:flex;align-items:center;gap:10px}
+  .cat h3 svg{width:22px;height:22px;flex:none}
+  .cat p{margin:0;color:var(--texto-2);font-size:.9rem}
+  .cat .pronto{
+    display:inline-block;margin-top:12px;font-size:.78rem;color:var(--acento-2);
+    border:1px solid rgba(245,166,35,.4);border-radius:999px;padding:2px 10px;
+  }
+
+  footer{
+    border-top:1px solid var(--borde);color:var(--texto-2);font-size:.85rem;text-align:center;
+    padding:24px max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    #pista{height:auto}
+    #escena{position:static;height:auto;min-height:100vh}
+    .pieza{position:static;margin:0;opacity:1!important;transform:none!important}
+    #lienzo{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;aspect-ratio:auto;max-height:none;padding-top:160px}
+    #auto{position:static;transform:none;width:100%}
+    #lineas,#pista-aviso{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="marca">Depósito de filtros<small>catálogo mayorista</small></div>
+  <nav>
+    <a href="#categorias">Categorías</a>
+    <a href="#cat-filtros">Filtros</a>
+    <a href="#cat-aceite">Aceites</a>
+  </nav>
+</header>
+
+<div id="pista">
+  <section id="escena" aria-label="Presentación">
+    <div id="titulo">
+      <h1>Todo lo que tu lubricentro necesita</h1>
+      <p>Deslizá para ver las líneas de productos</p>
+    </div>
+
+    <div id="lienzo">
+      <svg id="lineas" aria-hidden="true"></svg>
+
+      <div id="auto" aria-hidden="true">
+        <!-- Para usar una foto real: guardá auto.png (fondo transparente o limpio,
+             auto de costado mirando a la derecha) junto a este archivo. Se usa sola. -->
+        <img id="foto-auto" src="auto.png" alt="">
+        <svg id="auto-svg" viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="450" cy="318" rx="330" ry="16" fill="#000" opacity=".35"/>
+          <path d="M120 268 C118 236 132 212 170 204 L250 190 C300 150 352 128 436 126 L560 126 C628 128 668 152 706 192 L780 206 C812 214 824 234 822 262 L816 282 C812 292 804 296 792 296 L748 296"
+                fill="#39444f" stroke="#222a31" stroke-width="3"/>
+          <path d="M120 268 L126 284 C130 292 138 296 150 296 L196 296" fill="#39444f" stroke="#222a31" stroke-width="3"/>
+          <path d="M300 296 L600 296" stroke="#222a31" stroke-width="3"/>
+          <path d="M268 192 C312 158 356 140 434 138 L552 138 C612 140 648 160 684 194 Z" fill="#1b2127"/>
+          <path d="M452 142 L452 192" stroke="#39444f" stroke-width="8"/>
+          <path d="M706 192 L780 206 C812 214 824 234 822 262 L706 262 Z" fill="#434f5b"/>
+          <rect x="806" y="226" width="14" height="18" rx="4" fill="#ffd27a"/>
+          <rect x="118" y="238" width="12" height="16" rx="4" fill="#b33"/>
+          <circle cx="248" cy="296" r="46" fill="#14181c" stroke="#222a31" stroke-width="4"/>
+          <circle cx="248" cy="296" r="22" fill="#2c3640"/>
+          <circle cx="652" cy="296" r="46" fill="#14181c" stroke="#222a31" stroke-width="4"/>
+          <circle cx="652" cy="296" r="22" fill="#2c3640"/>
+          <path d="M470 196 L700 196 L690 258 L470 258 Z" fill="#39444f" opacity=".0"/>
+        </svg>
+      </div>
+      <!-- Las piezas se crean desde el JavaScript -->
+    </div>
+
+    <div id="pista-aviso"><span class="flecha">▾</span>Seguí bajando</div>
+  </section>
+</div>
+
+<main id="categorias">
+  <h2>Elegí una categoría</h2>
+  <p>Trabajamos con las principales marcas del rubro. Pedinos por código, por equivalencia o por vehículo.</p>
+  <div id="grilla"></div>
+</main>
+
+<footer>Catálogo en construcción · Los pedidos se reciben por los canales de siempre</footer>
+
+<script>
+"use strict";
+
+/* ============================================================
+   CONFIGURACIÓN — lo único que hace falta tocar.
+   foto: nombre del archivo dentro de la carpeta fotos/.
+         Si el archivo no existe, se muestra el dibujo.
+   origen: de qué punto del auto sale la pieza (en % del lienzo).
+   destino: a dónde vuela en pantalla grande (en % del lienzo).
+   ============================================================ */
+const PIEZAS = [
+  {id:"filtros",     nombre:"Filtros",                foto:"filtros.webp",
+   desc:"De aceite, aire, combustible y habitáculo.",
+   origen:{x:63,y:52}, destino:{x:88,y:22},
+   icono:'<circle cx="24" cy="24" r="15" fill="none" stroke="#f5a623" stroke-width="3"/><circle cx="24" cy="24" r="6" fill="#f5a623"/><path d="M24 9v-5M24 44v-5M9 24H4m40 0h-5" stroke="#f5a623" stroke-width="3"/>'},
+  {id:"aceite",      nombre:"Aceite de motor",        foto:"aceite.webp",
+   desc:"Líneas mineral, semisintética y sintética.",
+   origen:{x:68,y:58}, destino:{x:91,y:56},
+   icono:'<path d="M16 12h12v6l6 4v18a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4V12z" fill="none" stroke="#f5a623" stroke-width="3"/><path d="M16 8h12" stroke="#f5a623" stroke-width="3"/><path d="M12 26h10" stroke="#f5a623" stroke-width="3"/>'},
+  {id:"refrigerante",nombre:"Refrigerante",           foto:"refrigerante.webp",
+   desc:"Orgánicos y de larga duración.",
+   origen:{x:84,y:60}, destino:{x:76,y:85},
+   icono:'<path d="M24 6c6 9 12 15 12 23a12 12 0 1 1-24 0c0-8 6-14 12-23z" fill="none" stroke="#f5a623" stroke-width="3"/>'},
+  {id:"pastillas",   nombre:"Pastillas de freno",     foto:"pastillas.webp",
+   desc:"Línea Mazfren para auto y utilitario.",
+   origen:{x:70,y:82}, destino:{x:50,y:92},
+   icono:'<path d="M10 16c8-6 20-6 28 0l-3 7c-7-4-15-4-22 0z" fill="#f5a623"/><path d="M12 30c7-4 17-4 24 0l-2 6c-6-3-14-3-20 0z" fill="none" stroke="#f5a623" stroke-width="3"/>'},
+  {id:"escobillas",  nombre:"Escobillas",             foto:"escobillas.webp",
+   desc:"Limpiaparabrisas por medida, con una foto por tipo.",
+   origen:{x:50,y:38}, destino:{x:24,y:85},
+   icono:'<path d="M8 34L36 10" stroke="#f5a623" stroke-width="4" stroke-linecap="round"/><path d="M12 38l22-19" stroke="#f5a623" stroke-width="7" stroke-linecap="round" opacity=".5"/>'},
+  {id:"aditivos",    nombre:"Aditivos para motor",    foto:"aditivos.webp",
+   desc:"Limpiadores, antifricción y tratamientos.",
+   origen:{x:72,y:52}, destino:{x:9,y:56},
+   icono:'<rect x="17" y="14" width="14" height="28" rx="4" fill="none" stroke="#f5a623" stroke-width="3"/><path d="M20 8h8v6h-8z" fill="#f5a623"/><path d="M21 26h6" stroke="#f5a623" stroke-width="3"/>'},
+  {id:"estetica",    nombre:"Estética vehicular",     foto:"estetica.webp",
+   desc:"Siliconas, shampoo, paños y perfumes.",
+   origen:{x:45,y:60}, destino:{x:12,y:22},
+   icono:'<path d="M14 34a10 10 0 0 1 20 0z" fill="none" stroke="#f5a623" stroke-width="3"/><path d="M24 10l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5z" fill="#f5a623"/>'},
+];
+
+/* En pantallas angostas las piezas se acomodan en dos columnas. */
+const DESTINO_CEL = [
+  {x:26,y:8},{x:74,y:8},{x:26,y:38},{x:74,y:38},{x:26,y:68},{x:74,y:68},{x:50,y:94}
+];
+
+const lienzo = document.getElementById("lienzo");
+const svgLineas = document.getElementById("lineas");
+const autoNodo = document.getElementById("auto");
+const grilla = document.getElementById("grilla");
+const aviso = document.getElementById("pista-aviso");
+const pista = document.getElementById("pista");
+
+/* Foto real del auto: si auto.png existe, reemplaza al dibujo. */
+const fotoAuto = document.getElementById("foto-auto");
+fotoAuto.addEventListener("load", () => {
+  fotoAuto.style.display = "block";
+  document.getElementById("auto-svg").style.display = "none";
+});
+fotoAuto.addEventListener("error", () => { fotoAuto.remove(); });
+
+/* Crear piezas, líneas y tarjetas de categoría. */
+const nodos = [];
+PIEZAS.forEach((p, i) => {
+  const a = document.createElement("a");
+  a.className = "pieza";
+  a.href = "#cat-" + p.id;
+  a.innerHTML =
+    '<span class="disco"><img alt="" loading="lazy"><svg viewBox="0 0 48 48" aria-hidden="true">' + p.icono + "</svg></span>" +
+    '<span class="nombre">' + p.nombre + "</span>";
+  const img = a.querySelector("img");
+  img.src = "fotos/" + p.foto;
+  img.addEventListener("load", () => {
+    img.style.display = "block";
+    a.querySelector("svg").style.display = "none";
+  });
+  img.addEventListener("error", () => img.remove());
+  lienzo.appendChild(a);
+
+  const ln = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  svgLineas.appendChild(ln);
+  nodos.push({cfg:p, el:a, linea:ln});
+
+  const card = document.createElement("section");
+  card.className = "cat";
+  card.id = "cat-" + p.id;
+  card.innerHTML =
+    "<h3><svg viewBox='0 0 48 48' aria-hidden='true'>" + p.icono + "</svg>" + p.nombre + "</h3>" +
+    "<p>" + p.desc + "</p><span class='pronto'>Listado completo próximamente</span>";
+  grilla.appendChild(card);
+});
+
+/* Animación por scroll. */
+const suave = t => t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2;
+const lerp = (a, b, t) => a + (b - a) * t;
+let alto = 1, ancho = 1, esCel = false;
+
+function medir(){
+  const r = lienzo.getBoundingClientRect();
+  ancho = r.width; alto = r.height;
+  esCel = window.innerWidth < 700;
+  svgLineas.setAttribute("viewBox", "0 0 " + ancho + " " + alto);
+  pintar();
+}
+
+function progreso(){
+  const total = pista.offsetHeight - window.innerHeight;
+  if (total <= 0) return 1;
+  const y = Math.min(Math.max(-pista.getBoundingClientRect().top, 0), total);
+  return y / total;
+}
+
+function pintar(){
+  const p = suave(progreso());
+  autoNodo.style.transform = "translate(-50%,-50%) scale(" + lerp(1, esCel ? .62 : .8, p) + ")";
+  autoNodo.style.opacity = lerp(1, .55, p);
+  aviso.style.opacity = p > .08 ? 0 : 1;
+  document.querySelector("#titulo p").style.opacity = Math.max(1 - p * 2.5, 0);
+
+  nodos.forEach((n, i) => {
+    const o = n.cfg.origen;
+    const d = esCel ? DESTINO_CEL[i] : n.cfg.destino;
+    const x = lerp(o.x, d.x, p) / 100 * ancho;
+    const y = lerp(o.y, d.y, p) / 100 * alto;
+    n.el.style.transform = "translate(" + x + "px," + y + "px) scale(" + lerp(.3, 1, Math.min(p * 1.6, 1)) + ")";
+    n.el.style.opacity = Math.min(p * 3, 1);
+    n.linea.setAttribute("x1", o.x / 100 * ancho);
+    n.linea.setAttribute("y1", o.y / 100 * alto);
+    n.linea.setAttribute("x2", x);
+    n.linea.setAttribute("y2", y);
+    n.linea.style.opacity = p > .12 ? Math.min((p - .12) * 2, .7) : 0;
+  });
+}
+
+let pedido = false;
+function alScroll(){
+  if (pedido) return;
+  pedido = true;
+  requestAnimationFrame(() => { pedido = false; pintar(); });
+}
+
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches){
+  addEventListener("scroll", alScroll, {passive:true});
+  addEventListener("resize", medir);
+  medir();
+}
+</script>
+</body>
+</html>
